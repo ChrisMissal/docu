@@ -8,10 +8,12 @@ namespace Docu.Documentation
 {
     public class Event : BaseDocumentationElement, IReferencable
     {
-        public Event(EventIdentifier identifier)
+        public DeclaredType Type { get; set; }
+
+        public Event(EventIdentifier identifier, DeclaredType type)
             : base(identifier)
         {
-            Summary = new List<IComment>();
+            Type = type;
         }
 
         public string FullName
@@ -34,19 +36,19 @@ namespace Docu.Documentation
                 if (ev == null)
                     throw new InvalidOperationException("Cannot resolve to '" + referencable.GetType().FullName + "'");
 
-                foreach (IReferrer comment in Summary.Where(x => x is IReferrer))
-                {
-                    if (!comment.Reference.IsResolved)
-                        comment.Reference.Resolve(referencables);
-                }
+                if (!Summary.IsResolved)
+                    Summary.Resolve(referencables);
+
+                if (!Remarks.IsResolved)
+                    Remarks.Resolve(referencables);
             }
             else
                 ConvertToExternalReference();
         }
 
-        public static Event Unresolved(EventIdentifier eventIdentifier)
+        public static Event Unresolved(EventIdentifier eventIdentifier, DeclaredType type)
         {
-            return new Event(eventIdentifier) { IsResolved = false };
+            return new Event(eventIdentifier, type) { IsResolved = false };
         }
     }
 }

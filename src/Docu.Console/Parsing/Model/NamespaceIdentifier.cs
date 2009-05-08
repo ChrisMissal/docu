@@ -2,7 +2,7 @@ using System;
 
 namespace Docu.Parsing.Model
 {
-    public class NamespaceIdentifier : Identifier
+    public sealed class NamespaceIdentifier : Identifier, IEquatable<NamespaceIdentifier>, IComparable<NamespaceIdentifier>
     {
         public NamespaceIdentifier(string name)
             : base(name)
@@ -19,12 +19,36 @@ namespace Docu.Parsing.Model
             throw new NotImplementedException();
         }
 
+        public override bool Equals(Identifier obj)
+        {
+            // no need for expensive GetType calls since the class is sealed.
+            return Equals(obj as NamespaceIdentifier);
+        }
+
+        public bool Equals(NamespaceIdentifier other)
+        {
+            // no need for expensive GetType calls since the class is sealed.
+            if(((object)other) == null)
+            {
+                return false;
+            }
+
+            return (Name == other.Name);
+        }
+
         public override int CompareTo(Identifier other)
         {
-            if (other is NamespaceIdentifier)
-                return ToString().CompareTo(other.ToString());
+            return CompareTo(other as NamespaceIdentifier);
+        }
 
-            return -1;
+        public int CompareTo(NamespaceIdentifier other)
+        {
+            if(((object)other) == null)
+            {
+                return -1;
+            }
+
+            return Name.CompareTo(other.Name);
         }
     }
 }

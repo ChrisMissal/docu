@@ -22,19 +22,22 @@ namespace Docu.Documentation
             var ns = FindNamespace(association, namespaces);
             var type = FindType(ns, association);
 
-            DeclaredType propertyReturnType =
+            var propertyReturnType =
                 DeclaredType.Unresolved(Identifier.FromType(association.Property.PropertyType),
                                         association.Property.PropertyType,
                                         Namespace.Unresolved(
                                             Identifier.FromNamespace(association.Property.PropertyType.Namespace)));
-            Property doc = Property.Unresolved(Identifier.FromProperty(association.Property, association.TargetType),
-                                               propertyReturnType);
+            var doc = Property.Unresolved(Identifier.FromProperty(association.Property, association.TargetType), type, propertyReturnType);
 
             ParseSummary(association, doc);
             ParseValue(association, doc);
             ParseRemarks(association, doc);
 
+            if (matchedAssociations.ContainsKey(association.Name))
+                return;
+
             matchedAssociations.Add(association.Name, doc);
+            if (type == null) return;
             type.AddProperty(doc);
         }
     }

@@ -1,6 +1,8 @@
+using System;
+
 namespace Docu.Parsing.Model
 {
-    public class EventIdentifier : Identifier
+    public sealed class EventIdentifier : Identifier, IEquatable<EventIdentifier>, IComparable<EventIdentifier>
     {
         private readonly TypeIdentifier typeId;
 
@@ -9,37 +11,42 @@ namespace Docu.Parsing.Model
             this.typeId = typeId;
         }
 
-        public override int CompareTo(Identifier other)
-        {
-            if (other is EventIdentifier)
-            {
-                var e = (EventIdentifier)other;
-                int comparison = ToString().CompareTo(e.ToString());
-
-                if (comparison != 0)
-                    return comparison;
-
-                comparison = typeId.CompareTo(e.typeId);
-
-                if (comparison != 0)
-                    return comparison;
-
-                return 0;
-            }
-
-            return -1;
-        }
-
         public override bool Equals(Identifier obj)
         {
-            if (obj is EventIdentifier)
-            {
-                var other = (EventIdentifier)obj;
+            // no need for expensive GetType calls since the class is sealed.
+            return Equals(obj as EventIdentifier);
+        }
 
-                return base.Equals(obj) && typeId.Equals(other.typeId);
+        public bool Equals(EventIdentifier other)
+        {
+            // no need for expensive GetType calls since the class is sealed.
+            if(((object)other) == null)
+            {
+                return false;
             }
 
-            return false;
+            return (Name == other.Name) && typeId.Equals(other.typeId);
+        }
+
+        public override int CompareTo(Identifier other)
+        {
+            return CompareTo(other as EventIdentifier);
+        }
+
+        public int CompareTo(EventIdentifier other)
+        {
+            if(((object)other) == null)
+            {
+                return -1;
+            }
+
+            int comparison = Name.CompareTo(other.Name);
+            if(comparison != 0)
+            {
+                return comparison;
+            }
+
+            return typeId.CompareTo(other.typeId);
         }
 
         public override NamespaceIdentifier CloneAsNamespace()

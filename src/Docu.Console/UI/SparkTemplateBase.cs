@@ -53,9 +53,28 @@ namespace Docu.UI
 
         public string WriteProductName(Assembly assembly)
         {
-            var info = FileVersionInfo.GetVersionInfo(assembly.Location);
+            FileVersionInfo info = FileVersionInfo.GetVersionInfo(assembly.Location);
             
-            return info.ProductName;
+            return Formatter.Escape(info.ProductName);
+        }
+
+        public string WriteFileDescription(Assembly assembly)
+        {
+            FileVersionInfo info = FileVersionInfo.GetVersionInfo(assembly.Location);
+
+            return Formatter.Escape(info.FileDescription);
+        }
+
+        public string WriteAssemblyTitle(Assembly assembly)
+        {
+            FileVersionInfo info = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string productName = info.ProductName;
+            string fileDescription = info.FileDescription;
+            if(String.IsNullOrEmpty(fileDescription) || (productName == fileDescription))
+                return Formatter.Escape(productName);
+            if(String.IsNullOrEmpty(productName))
+                return Formatter.Escape(fileDescription);
+            return Formatter.Escape(String.Format("{0} ({1})", fileDescription, productName));
         }
 
         public string WriteVersion(Assembly assembly)
@@ -68,38 +87,14 @@ namespace Docu.UI
             return Formatter.Escape(content);
         }
 
-        public string WriteReference(IReferencable reference)
+        public string Format(IComment comment)
         {
-            return Formatter.Format(reference);
+            return Formatter.Format(comment);
         }
 
-        public string WriteSummary(IList<IComment> summary)
+        public string Format(IReferencable referencable)
         {
-            var sb = new StringBuilder();
-
-            foreach (IComment block in summary)
-            {
-                if (block is InlineCode)
-                {
-                    sb.Append(Formatter.Format((InlineCode)block));
-                    sb.Append(" ");
-                    continue;
-                }
-                if (block is IReferrer)
-                {
-                    sb.Append(WriteReference(((IReferrer)block).Reference));
-                    sb.Append(" ");
-                    continue;
-                }
-
-                sb.Append(block.ToString());
-                sb.Append(" ");
-            }
-
-            if (sb.Length > 0)
-                sb.Length--; // trim trailing whitespace
-
-            return sb.ToString();
+            return Formatter.FormatReferencable(referencable);
         }
 
         public string WriteInterfaces(IList<IReferencable> interfaces)
@@ -108,7 +103,7 @@ namespace Docu.UI
 
             foreach (IReferencable face in interfaces)
             {
-                sb.Append(WriteReference(face));
+                sb.Append(Format(face));
                 sb.Append(", ");
             }
 

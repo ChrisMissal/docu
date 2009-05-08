@@ -1,8 +1,10 @@
+using System;
+
 namespace Docu.Parsing.Model
 {
-    public class PropertyIdentifier : Identifier
+    public sealed class PropertyIdentifier : Identifier, IEquatable<PropertyIdentifier>, IComparable<PropertyIdentifier>
     {
-        private readonly Identifier typeId;
+        private readonly TypeIdentifier typeId;
 
         public PropertyIdentifier(string name, bool hasGet, bool hasSet, TypeIdentifier typeId)
             : base(name)
@@ -25,37 +27,42 @@ namespace Docu.Parsing.Model
             return typeId.CloneAsType();
         }
 
-        public override int CompareTo(Identifier other)
-        {
-            if (other is PropertyIdentifier)
-            {
-                var p = (PropertyIdentifier)other;
-                int comparison = ToString().CompareTo(p.ToString());
-
-                if (comparison != 0)
-                    return comparison;
-
-                comparison = typeId.CompareTo(p.typeId);
-
-                if (comparison != 0)
-                    return comparison;
-
-                return 0;
-            }
-
-            return -1;
-        }
-
         public override bool Equals(Identifier obj)
         {
-            if (obj is PropertyIdentifier)
-            {
-                var other = (PropertyIdentifier)obj;
+            // no need for expensive GetType calls since the class is sealed.
+            return Equals(obj as PropertyIdentifier);
+        }
 
-                return base.Equals(obj) && typeId.Equals(other.typeId);
+        public bool Equals(PropertyIdentifier other)
+        {
+            // no need for expensive GetType calls since the class is sealed.
+            if(((object)other) == null)
+            {
+                return false;
             }
 
-            return false;
+            return (Name == other.Name) && typeId.Equals(other.typeId);
+        }
+
+        public override int CompareTo(Identifier other)
+        {
+            return CompareTo(other as PropertyIdentifier);
+        }
+
+        public int CompareTo(PropertyIdentifier other)
+        {
+            if(((object)other) == null)
+            {
+                return -1;
+            }
+
+            int comparison = Name.CompareTo(other.Name);
+            if(comparison != 0)
+            {
+                return comparison;
+            }
+
+            return typeId.CompareTo(other.typeId);
         }
     }
 }

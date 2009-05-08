@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+<PropertyGroup>
+  <Configuration>Debug</Configuration>
+</PropertyGroup>
+<Target Name="Build" DependsOnTargets="Compile;Test;Package" />
+
+<Target Name="Compile">
+  <MSbuild Projects="src\Docu.sln" Properties="Configuration=$(Configuration)" />
+</Target>
+
+<Target Name="Test">
+  <Exec Command="lib\nunit\nunit-console.exe src\Docu.Tests\bin\$(Configuration)\Docu.Tests.dll" />
+</Target>
+
+<Target Name="Package">
+  <Exec Command="lib\ilmerge\ILMerge.exe /Out:docu.exe src\Docu.Console\bin\$(Configuration)\docu.exe lib\spark\Spark.dll lib\spark\SparkLanguage.dll lib\spark\Interop.SparkLanguagePackageLib.dll lib\structuremap\structuremap.dll" />
+  <Message Text="Created docu.exe" />
+</Target>
+</Project>
